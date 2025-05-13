@@ -57,6 +57,7 @@ exports.catchSensorReading = async (req, res, io) => {
             aqi,
             timestamp: new Date(),
         })
+        //FIX: CHANGE THIS BELOW LINE TO SAVE THE SENSOR READING TO DB
         // await sensorReading.save();
         logger.info(`Sensor reading saved successfully: ${sensorReading}`);
         if (io) {
