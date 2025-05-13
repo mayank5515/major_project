@@ -10,10 +10,7 @@ exports.getLatestSensorReading = async (req, res) => {
             return res.status(404).json({ message: "No readings found" });
         }
         logger.info(`Latest sensor reading  ${latestReading}`);
-        res.status(200).json({
-            status: 'success',
-            data: latestReading
-        });
+        res.json(latestReading);
     }
     catch (err) {
         logger.error(`Error fetching latest sensor reading: ${err}`);
@@ -26,12 +23,13 @@ exports.getLatestSensorReading = async (req, res) => {
 
 exports.getAllSensorReadings = async (req, res) => {
     try {
-        const sensorReadings = await SensorReading.find();
+        const sensorReadings = await SensorReading.find().sort({ timestamp: -1 });
         logger.info(`Sensor readings fetched successfully: ${sensorReadings}`);
-        res.status(200).json({
-            message: 'Sensor readings fetched successfully',
-            data: sensorReadings
-        })
+        res.json(sensorReadings);
+        // res.status(200).json({
+        //     message: 'Sensor readings fetched successfully',
+        //     data: sensorReadings
+        // })
     }
     catch (err) {
         logger.error(`Error fetching sensor readings: ${err}`);
@@ -42,7 +40,7 @@ exports.getAllSensorReadings = async (req, res) => {
     }
 };
 
-exports.catchSensorReading = async (req, res) => {
+exports.catchSensorReading = async (req, res, io) => {
     try {
         const { temperature, humidity, aqi } = req.body;
         console.log('Recieved catchSensorReading: ', req.body);
@@ -59,10 +57,10 @@ exports.catchSensorReading = async (req, res) => {
             aqi,
             timestamp: new Date(),
         })
-        await sensorReading.save();
+        // await sensorReading.save();
         logger.info(`Sensor reading saved successfully: ${sensorReading}`);
         if (io) {
-            io.emit("Sensor Sent some reading");
+            io.emit("sensorReading");
         }
         res.status(200).json({
             message: 'Sensor reading saved successfully',
@@ -78,3 +76,18 @@ exports.catchSensorReading = async (req, res) => {
         })
     }
 }
+exports.getLast24HoursReadings = async (req, res) => {
+    try {
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+        const readings = await SensorReading.find({
+            timestamp: { $gte: twentyFourHoursAgo }
+        }).sort({ timestamp: 1 }); // ascending order by time
+
+        res.json(readings);
+        // res.status(200).json({ success: true, data: readings });
+    } catch (error) {
+        console.error('Error fetching last 24 hours readings:', error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
