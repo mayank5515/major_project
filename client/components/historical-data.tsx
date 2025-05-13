@@ -1,7 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
 import { Button } from "@/components/ui/button"
 import { getAQIColor } from "@/lib/aqi-utils"
 
@@ -15,29 +25,38 @@ interface HistoricalDataProps {
 
 export default function HistoricalData({ data, interval }: HistoricalDataProps) {
   const [chartType, setChartType] = useState<"line" | "bar">("line")
-
   const currentTime = new Date()
 
   // Filter data based on interval
   const filteredData = data.filter((item) => {
     const itemTime = new Date(item.timestamp)
     if (interval === "hourly") {
-      const hoursDifference = (currentTime.getTime() - itemTime.getTime()) / (1000 * 60 * 60) // Time difference in hours
-      return hoursDifference <= 8 // Filter data for the last 8 hours
+      const hoursDifference = (currentTime.getTime() - itemTime.getTime()) / (1000 * 60 * 60)
+      return hoursDifference <= 8
     } else if (interval === "daily") {
-      const daysDifference = (currentTime.getTime() - itemTime.getTime()) / (1000 * 60 * 60 * 24) // Time difference in days
-      return daysDifference <= 12 // Filter data for the last 12 days
+      const daysDifference = (currentTime.getTime() - itemTime.getTime()) / (1000 * 60 * 60 * 24)
+      return daysDifference <= 7
     }
     return false
   })
 
-  const chartData = filteredData.map((item) => ({
-    ...item,
-    formattedTime:
-      interval === "hourly"
-        ? new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-        : new Date(item.timestamp).toLocaleDateString([], { month: "short", day: "numeric" }),
-  }))
+  // Format and sort data by time
+  const chartData = filteredData
+    .map((item) => ({
+      ...item,
+      formattedTime:
+        interval === "hourly"
+          ? new Date(item.timestamp).toLocaleTimeString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          })
+          : new Date(item.timestamp).toLocaleDateString("en-GB", {
+            month: "short",
+            day: "numeric",
+          }),
+    }))
+    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
 
   return (
     <div className="space-y-4">
@@ -119,7 +138,7 @@ export default function HistoricalData({ data, interval }: HistoricalDataProps) 
     </div>
   )
 }
-
+////////////////////////
 // "use client"
 
 // import { useState } from "react"
@@ -138,9 +157,22 @@ export default function HistoricalData({ data, interval }: HistoricalDataProps) 
 // export default function HistoricalData({ data, interval }: HistoricalDataProps) {
 //   const [chartType, setChartType] = useState<"line" | "bar">("line")
 
-//   // In a real app, you would fetch different data based on the interval
-//   // For this demo, we'll just use the same data
-//   const chartData = data.map((item) => ({
+//   const currentTime = new Date()
+
+//   // Filter data based on interval
+//   const filteredData = data.filter((item) => {
+//     const itemTime = new Date(item.timestamp)
+//     if (interval === "hourly") {
+//       const hoursDifference = (currentTime.getTime() - itemTime.getTime()) / (1000 * 60 * 60) // Time difference in hours
+//       return hoursDifference <= 8 // Filter data for the last 8 hours
+//     } else if (interval === "daily") {
+//       const daysDifference = (currentTime.getTime() - itemTime.getTime()) / (1000 * 60 * 60 * 24) // Time difference in days
+//       return daysDifference <= 12 // Filter data for the last 12 days
+//     }
+//     return false
+//   })
+
+//   const chartData = filteredData.map((item) => ({
 //     ...item,
 //     formattedTime:
 //       interval === "hourly"
@@ -189,7 +221,6 @@ export default function HistoricalData({ data, interval }: HistoricalDataProps) 
 //               <Line
 //                 type="monotone"
 //                 dataKey="aqi"
-//                 // stroke="var(--primary)"
 //                 stroke="#4f46e5"
 //                 strokeWidth={2}
 //                 dot={{ r: 3 }}
@@ -229,3 +260,4 @@ export default function HistoricalData({ data, interval }: HistoricalDataProps) 
 //     </div>
 //   )
 // }
+

@@ -9,6 +9,7 @@ interface TempHumidityProps {
 
 export default function TempHumidity({ data }: TempHumidityProps) {
   const { temperature, humidity } = data
+  // console.log("Temp & Humidity Card Data:", data)
 
   return (
     <div className="grid grid-cols-2 gap-4">

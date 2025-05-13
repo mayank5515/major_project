@@ -5,25 +5,29 @@ import { getAQIColor, getAQICategory } from "@/lib/aqi-utils"
 import { ArrowDown, ArrowUp, Minus } from "lucide-react"
 
 interface AQIComparisonProps {
-  realTimeData: Array<{
+  realTimeData: {
     aqi: number
     timestamp: string
     location: string
-  }>
-  forecastedData: Array<{
+    coordinates?: {
+      latitude: number
+      longitude: number
+    }
+  }
+  forecastedData: {
     aqi: number
     timestamp: string
     location: string
-  }>
+  }
 }
 
 export default function AQIComparison({ realTimeData, forecastedData }: AQIComparisonProps) {
   // Get the latest real-time AQI
-  const currentAQI = realTimeData[realTimeData.length - 1].aqi
+  const currentAQI = realTimeData.aqi
 
   // Get the forecasted AQI for the current time
-  const currentForecastedAQI = forecastedData.find((item) => item.location === "Delhi (Central)")?.aqi || 0
-
+  const currentForecastedAQI = forecastedData?.aqi || 0
+  console.log("Current Forecasted Data: ", forecastedData)
   // Calculate the difference and accuracy
   const difference = currentAQI - currentForecastedAQI
   const percentageDiff = (Math.abs(difference) / currentAQI) * 100
